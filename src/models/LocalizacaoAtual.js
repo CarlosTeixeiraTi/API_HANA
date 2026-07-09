@@ -14,6 +14,25 @@ module.exports = (sequelize, DataTypes) => {
             unique: true
         },
 
+        ordem: {
+            type: DataTypes.STRING(30)
+        },
+        localInstalacao: {
+            type: DataTypes.STRING(255)
+        },
+
+        centro_trab_resp: {
+            type: DataTypes.STRING(30)
+        },
+
+        centro_localizacao: {
+            type: DataTypes.STRING(20)
+        },
+
+        oficina: {
+            type: DataTypes.STRING(100)
+        },
+
         descEquipamento: {
             type: DataTypes.STRING(255)
         },
@@ -45,6 +64,10 @@ module.exports = (sequelize, DataTypes) => {
         justificativa: {
             type: DataTypes.TEXT
         }
+
+    }, {
+
+        tableName: 'LocalizacaoAtuals'
 
     });
 

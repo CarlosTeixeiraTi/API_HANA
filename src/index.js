@@ -76,6 +76,21 @@ async function atualizarDados() {
         );
 
         console.log(
+            "Atualizando OrdensRastreio..."
+        );
+
+        await axios.get(
+            "http://127.0.0.1:4000/SincronizarOrdensRastreio",
+            {
+                timeout: 10 * 60 * 1000
+            }
+        );
+
+        console.log(
+            "OrdensRastreio atualizada com sucesso."
+        );
+
+        console.log(
             "Processando LocalizacaoAtual..."
         );
 

@@ -810,6 +810,110 @@ router.get('/notes', (request, response) => {
     }
 })
 
+router.get('/sincronizar-ordens-rastreio', async (req, res) => {
+    let hanaClient;
+
+    try {
+
+        // 1 - Buscar identificadores iniciados por 1
+        const rastreios = await Rastreio.findAll({
+            attributes: ['identificador'],
+            where: {
+                identificador: {
+                    [Op.like]: '1%'
+                }
+            }
+        });
+
+        const equipamentos = rastreios
+            .map(r => r.identificador)
+            .filter(Boolean);
+
+        if (equipamentos.length === 0) {
+            return res.json([]);
+        }
+
+        // 2 - Monta cláusula IN
+        const equipamentosIn = equipamentos
+            .map(e => `'${e}'`)
+            .join(',');
+
+        hanaClient = hdb.createClient(databaseConfig);
+
+        await new Promise((resolve, reject) => {
+            hanaClient.connect(err => {
+                if (err) reject(err);
+                else resolve();
+            });
+        });
+
+        const sql = `
+            SELECT
+                EQUIPAMENTO,
+                ORDEM,
+                CENTRO_TRAB_RESP,
+                NOTA,
+                STATUS_SISTEMA_OM,
+                STATUS_USUARIO_OM,
+                DATA_CRIACAO,
+                CENTRO_CENTRO_TRABALHO,
+                TEXTO_BREVE_OM,
+                LOCAL_INSTALACAO
+            FROM "_SYS_BIC"."HIW_PRD.E.SISTEMAS.M52S/M52S_CV_002"
+            WHERE EQUIPAMENTO IN (${equipamentosIn})
+              AND TIPO_ORDEM = 'YRR'
+            ORDER BY DATA_CRIACAO DESC
+        `;
+
+        const rows = await new Promise((resolve, reject) => {
+            hanaClient.exec(sql, (err, rows) => {
+                if (err) reject(err);
+                else resolve(rows);
+            });
+        });
+
+        hanaClient.end();
+
+        // 3 - Salvar no MySQL
+        if (rows.length > 0) {
+
+            const inserts = rows.map(item => ({
+                equipamento: item.EQUIPAMENTO,
+                ordem: item.ORDEM,
+                centro_trab_resp: item.CENTRO_TRAB_RESP,
+                nota: item.NOTA,
+                status_sistema_om: item.STATUS_SISTEMA_OM,
+                status_usuario_om: item.STATUS_USUARIO_OM,
+                data_criacao: item.DATA_CRIACAO,
+                centro_centro_trabalho: item.CENTRO_CENTRO_TRABALHO,
+                texto_breve_om: item.TEXTO_BREVE_OM,
+                local_instalacao: item.LOCAL_INSTALACAO
+            }));
+
+            await sequelize.getQueryInterface().bulkInsert(
+                'OrdensRastreio',
+                inserts
+            );
+        }
+
+        return res.json(rows);
+
+    } catch (error) {
+
+        if (hanaClient) {
+            try {
+                hanaClient.end();
+            } catch (e) {}
+        }
+
+        console.error(error);
+
+        return res.status(500).json({
+            erro: error.message
+        });
+    }
+});
+
 //passando parametros por parametros da URL
 //insomnia: http://localhost:3000/hana/notes/EFVM-MTR-VAG-VGGDE-GDE2012847
 router.get('/notes/:local_instalacao', (request, response) => {
