@@ -17,6 +17,9 @@ module.exports = (sequelize, DataTypes) => {
         ordem: {
             type: DataTypes.STRING(30)
         },
+        nota: {
+            type: DataTypes.STRING(30)
+        },
         localInstalacao: {
             type: DataTypes.STRING(255)
         },

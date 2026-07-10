@@ -6,8 +6,7 @@ const {
     Rastreio,
     Equipamentos,
     LocalizacaoAtual,
-    OrdensRastreio,
-    CentroOficina
+    NotasReforma
 } = require('../models');
 
 router.get('/', async (req, res) => {
@@ -131,56 +130,39 @@ router.get('/processar', async (req, res) => {
                 .toString()
                 .padStart(18, "0");
 
-            let ordemMaisRecente = null;
             let centroTrabResp = null;
             let centroLocalizacao = null;
             let oficina = null;
+            let nota = null;
 
-            const ordemRastreio = await OrdensRastreio.findOne({
+            const notaReforma = await NotasReforma.findOne({
 
                 where: {
                     equipamento: equipamentoSAP
                 },
 
                 order: [
-                    ['data_criacao', 'DESC']
+                    ['ordem_numero', 'DESC']
                 ]
 
             });
-            if (ordemRastreio) {
 
-                ordemMaisRecente =
-                    ordemRastreio.ordem;
+            if (notaReforma) {
+
+                nota =
+                    notaReforma.nota;
 
                 centroTrabResp =
-                    ordemRastreio.centro_trab_resp;
+                    notaReforma.centro_trabalho_respons;
 
                 centroLocalizacao =
-                    ordemRastreio.centro_centro_trabalho;
+                    notaReforma.centro_localizacao;
 
-                const oficinaEncontrada =
-                    await CentroOficina.findOne({
-
-                        where: {
-
-                            CENTRO_TRABALHO:
-                                centroTrabResp,
-
-                            CENTRO_LOCALIZACAO:
-                                centroLocalizacao
-
-                        }
-
-                    });
-
-                if (oficinaEncontrada) {
-
-                    oficina =
-                        oficinaEncontrada.OFICINA;
-
-                }
+                oficina =
+                    notaReforma.oficina;
 
             }
+
 
             if (!equipamento) {
                 console.log(
@@ -271,63 +253,67 @@ router.get('/processar', async (req, res) => {
             const totalLR = historico.filter(
                 r => r.tipoComunicacao === 'LR'
             ).length;
-            
+
 
             console.log({
                 identificador,
-                ordemMaisRecente,
                 centroTrabResp,
                 centroLocalizacao,
                 oficina
             });
             await LocalizacaoAtual.upsert({
 
-    identificador,
+                identificador,
 
-    ordem: ordemMaisRecente,
+                nota: nota,
 
-    centro_trab_resp: centroTrabResp,
+                centro_trab_resp: centroTrabResp,
 
-    centro_localizacao: centroLocalizacao,
+                centro_localizacao: centroLocalizacao,
 
-    oficina: oficina,
+                oficina: oficina,
 
-    localInstalacao:
-        equipamento?.LOCAL_INSTALACAO || '',
+                localInstalacao:
+                    equipamento?.LOCAL_INSTALACAO || '',
 
-    descEquipamento:
-        equipamento?.DESC_EQUIPAMENTO
-            ?.substring(0, 15) || '',
+                descEquipamento:
+                    equipamento?.DESC_EQUIPAMENTO || '',
 
-    grupoAtual: localizacaoCalculada,
+                grupoAtual: localizacaoCalculada,
 
-    grupoAnterior: ultimoGrupoValido,
+                grupoAnterior: ultimoGrupoValido,
 
-    confianca: confiancaNumerica,
+                confianca: confiancaNumerica,
 
-    tipoDominante:
-        ultimoRegistro.tipoComunicacao,
+                tipoDominante:
+                    ultimoRegistro.tipoComunicacao,
 
-    amostrasAnalisadas:
-        historico.length,
+                amostrasAnalisadas:
+                    historico.length,
 
-    ultimaPosicaoAnalisada:
-        ultimoRegistro.ultimaPosicao,
+                ultimaPosicaoAnalisada:
+                    ultimoRegistro.ultimaPosicao,
 
-    justificativa:
-        `Último registro encontrado via ${ultimoRegistro.tipoComunicacao}`
+                justificativa:
+                    `Último registro encontrado via ${ultimoRegistro.tipoComunicacao}`
 
-});
-
+            });
+            console.log("DADOS MAPA", {
+                identificador,
+                nota,
+                centroTrabResp,
+                centroLocalizacao,
+                oficina
+            });
             resultado.push({
 
                 identificador,
 
-                ordem: ordemMaisRecente,
+                nota: nota,
 
-                centroTrabResp: centroTrabResp,
+                centro_trab_resp: centroTrabResp,
 
-                centroLocalizacao: centroLocalizacao,
+                centro_localizacao: centroLocalizacao,
 
                 oficina: oficina,
 
@@ -376,6 +362,10 @@ router.get('/processar', async (req, res) => {
 
             });
         }
+
+        console.log(
+            resultado[resultado.length - 1]
+        );
 
         return res.json(resultado);
 

@@ -44,7 +44,7 @@ module.exports = (sequelize, DataTypes) => {
         },
 
         local_instalacao: {
-            type: DataTypes.STRING(100)
+            type: DataTypes.STRING(255)
         }
 
     }, {
