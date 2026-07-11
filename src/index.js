@@ -93,20 +93,20 @@ async function atualizarDados() {
         console.log(
             "Processando LocalizacaoAtual..."
         );
-console.log(
-    "Atualizando GPS dos veículos..."
-);
+        console.log(
+            "Atualizando GPS dos veículos..."
+        );
 
-await axios.get(
-    "http://127.0.0.1:4000/AtualizaVeiculoGPS",
-    {
-        timeout: 10 * 60 * 1000
-    }
-);
+        await axios.get(
+            "http://127.0.0.1:4000/AtualizaVeiculoGPS",
+            {
+                timeout: 10 * 60 * 1000
+            }
+        );
 
-console.log(
-    "GPS dos veículos atualizado com sucesso."
-);
+        console.log(
+            "GPS dos veículos atualizado com sucesso."
+        );
         await axios.get(
             "http://127.0.0.1:4000/LocalizacaoAtual/processar",
             {

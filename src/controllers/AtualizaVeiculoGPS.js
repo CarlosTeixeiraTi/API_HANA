@@ -123,48 +123,48 @@ router.get("/", async (req, res) => {
 
         for (const gps of result.recordset) {
 
-    const coordenadas = converterParaGps(
-        gps.PosX,
-        gps.PosY
-    );
+            const coordenadas = converterParaGps(
+                gps.PosX,
+                gps.PosY
+            );
 
-    const localOriginal =
-        locais[gps.TAG] || "";
+            const localOriginal =
+                locais[gps.TAG] || "";
 
-    const partes =
-        localOriginal.split("-");
+            const partes =
+                localOriginal.split("-");
 
-    const localInstalacao =
-        partes.length >= 5
-            ? partes.slice(0, 5).join("-")
-            : localOriginal;
+            const localInstalacao =
+                partes.length >= 5
+                    ? partes.slice(0, 5).join("-")
+                    : localOriginal;
 
-    const registro = {
+            const registro = {
 
-        LOCAL_INSTALACAO:
-            localInstalacao,
+                LOCAL_INSTALACAO:
+                    localInstalacao,
 
-        Veiculo:
-            gps.TAG,
+                Veiculo:
+                    gps.TAG,
 
-        Latitude:
-            Number(
-                coordenadas.latitude.toFixed(6)
-            ),
+                Latitude:
+                    Number(
+                        coordenadas.latitude.toFixed(6)
+                    ),
 
-        Longitude:
-            Number(
-                coordenadas.longitude.toFixed(6)
-            ),
+                Longitude:
+                    Number(
+                        coordenadas.longitude.toFixed(6)
+                    ),
 
-        DataAtualizacao:
-            new Date()
-    };
+                DataAtualizacao:
+                    new Date()
+            };
 
-    await Veiculo.upsert(registro);
+            await Veiculo.upsert(registro);
 
-    retorno.push(registro);
-}
+            retorno.push(registro);
+        }
         return res.json(retorno);
 
     } catch (err) {
