@@ -24,7 +24,7 @@ router.get("/", async (req, res) => {
 });
 
 router.get("/:localInstalacao", async (req, res) => {
-
+        
     try {
 
         const data = await Veiculo.findOne({

@@ -2,7 +2,7 @@ const express = require('express');
 const axios = require('axios');
 
 const router = express.Router();
-
+const { Op } = require('sequelize');
 const { Equipamentos } = require('../models');
 
 router.get("/", async (req, res) => {
@@ -78,6 +78,99 @@ router.get("/atualizar", async (req, res) => {
 
 });
 
+router.get("/todos/:local", async (req, res) => {
+
+    try {
+
+        const equipamentos = await Equipamentos.findAll({
+
+            where: {
+
+                LOCAL_INSTALACAO: {
+                    [Op.like]: `%${req.params.local}%`
+                }
+
+            },
+
+            order: [
+                ["DESC_EQUIPAMENTO", "ASC"]
+            ]
+
+        });
+
+        return res.json(equipamentos);
+
+    } catch (err) {
+
+        console.log(err);
+
+        return res.status(400).send({
+            error: "Erro tente novamente"
+        });
+
+    }
+
+});
+
+
+router.get("/local/:local", async (req, res) => {
+
+    try {
+
+        const equipamentos = await Equipamentos.findAll({
+
+            where: {
+
+                LOCAL_INSTALACAO: {
+                    [Op.like]: `%${req.params.local}%`
+                }
+
+            }
+
+        });
+
+        const resumo = {};
+
+        equipamentos.forEach(item => {
+
+            const desc =
+                (item.DESC_EQUIPAMENTO || "")
+                    .toUpperCase();
+
+            let familia = null;
+
+            if (desc.startsWith("COMANDO FINAL")) {
+                familia = "COMANDO FINAL";
+            } else if (desc.startsWith("CONVERSOR TORQUE")) {
+                familia = "CONVERSOR DE TORQUE";
+            } else if (desc.startsWith("DIFERENCIAL")) {
+                familia = "DIFERENCIAL";
+            } else if (desc.startsWith("MOTOR")) {
+                familia = "MOTOR";
+            } else if (desc.startsWith("TRANSMISSAO")) {
+                familia = "TRANSMISSAO";
+            }
+
+            if (familia) {
+                resumo[familia] =
+                    (resumo[familia] || 0) + 1;
+            }
+
+        });
+
+        return res.json(resumo);
+
+    } catch (err) {
+
+        console.log(err);
+
+        return res.status(400).send({
+            error: "Erro tente novamente"
+        });
+
+    }
+
+});
 router.get("/:equipamento", async (req, res) => {
 
     try {
