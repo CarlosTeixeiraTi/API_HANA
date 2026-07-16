@@ -60,7 +60,8 @@ router.get("/veiculo", async (req, res) => {
             attributes: [
                 "identificador",
                 "descEquipamento",
-                "localInstalacao"
+                "localInstalacao",
+                "gateway"
             ]
 
         });
@@ -83,7 +84,11 @@ router.get("/veiculo", async (req, res) => {
                     item.descEquipamento,
 
                 localInstalacao:
-                    item.localInstalacao
+                    item.localInstalacao,
+
+                gateway:
+                    item.gateway
+
 
             }));
 
@@ -109,7 +114,8 @@ router.get("/", async (req, res) => {
             attributes: [
                 'identificador',
                 'descEquipamento',
-                'localInstalacao'
+                'localInstalacao',
+                "gateway"
             ]
 
         });

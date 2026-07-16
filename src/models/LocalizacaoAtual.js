@@ -66,7 +66,12 @@ module.exports = (sequelize, DataTypes) => {
 
         justificativa: {
             type: DataTypes.TEXT
+        },
+
+        gateway: {
+            type: DataTypes.STRING(50)
         }
+
 
     }, {
 
