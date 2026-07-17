@@ -89,7 +89,7 @@ router.get("/", async (req, res) => {
             .map(tag => `'${tag}'`)
             .join(',');
         console.log("sqlConfig:", sqlConfig);
-
+        
         const pool = await sql.connect(sqlConfig);
 
         const result = await pool.request().query(`
