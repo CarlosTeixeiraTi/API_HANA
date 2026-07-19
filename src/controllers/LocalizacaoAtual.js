@@ -272,7 +272,9 @@ router.get('/processar', async (req, res) => {
                 centro_localizacao: centroLocalizacao,
 
                 oficina: oficina,
-    gateway: ultimoRegistro.gateway,
+
+                gateway: ultimoRegistro.gateway,
+                
                 localInstalacao:
                     equipamento?.LOCAL_INSTALACAO || '',
 

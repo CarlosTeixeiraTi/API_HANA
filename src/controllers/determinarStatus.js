@@ -134,6 +134,7 @@ router.get("/", async (req, res) => {
 
             localInstalacao:
                 item.localInstalacao
+                
 
         }));
         return res.json(resultado);
