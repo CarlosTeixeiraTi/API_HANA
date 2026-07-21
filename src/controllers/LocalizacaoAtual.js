@@ -214,7 +214,42 @@ router.get('/processar', async (req, res) => {
                 }
             }
 
+            const localInstalacaoSAP =
+                (equipamento?.LOCAL_INSTALACAO || "")
+                    .toUpperCase();
+
+            const descEquipamentoSAP =
+                (equipamento?.DESC_EQUIPAMENTO || "")
+                    .toUpperCase();
+
+            
+
             if (
+                localInstalacaoSAP.includes(
+                    "FEIT-LES-MVC-AMACC-MINA-REFO"
+                )
+            ) {
+
+                const ehMotorOuComandoFinal =
+                    descEquipamentoSAP.includes("MOTOR") ||
+                    descEquipamentoSAP.includes("COMANDO FINAL");
+
+                if (ehMotorOuComandoFinal) {
+
+                    // Área 23
+                    latitudeFinal = -19.604498;
+                    longitudeFinal = -43.211828;
+
+                } else {
+
+                    // Área 27
+                    latitudeFinal = -19.601748;
+                    longitudeFinal = -43.209649;
+
+                }
+
+            }
+            else if (
                 latitudeFinal === null &&
                 centrosPorGrupo[localizacaoCalculada]
             ) {
@@ -228,6 +263,7 @@ router.get('/processar', async (req, res) => {
                     centrosPorGrupo[
                         localizacaoCalculada
                     ].longitude;
+
             }
 
             let confiancaTexto = 'BAIXA';
@@ -274,7 +310,7 @@ router.get('/processar', async (req, res) => {
                 oficina: oficina,
 
                 gateway: ultimoRegistro.gateway,
-                
+
                 localInstalacao:
                     equipamento?.LOCAL_INSTALACAO || '',
 
@@ -298,7 +334,6 @@ router.get('/processar', async (req, res) => {
 
                 justificativa:
                     `Último registro encontrado via ${ultimoRegistro.tipoComunicacao}`
-
             });
             console.log("DADOS MAPA", {
                 identificador,
