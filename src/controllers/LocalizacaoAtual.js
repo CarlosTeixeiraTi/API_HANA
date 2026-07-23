@@ -222,7 +222,7 @@ router.get('/processar', async (req, res) => {
                 (equipamento?.DESC_EQUIPAMENTO || "")
                     .toUpperCase();
 
-            
+
 
             if (
                 localInstalacaoSAP.includes(
@@ -321,6 +321,9 @@ router.get('/processar', async (req, res) => {
 
                 grupoAnterior: ultimoGrupoValido,
 
+                ultimaAtualizacao:
+                    ultimoRegistro.createdAt,
+
                 confianca: confiancaNumerica,
 
                 tipoDominante:
@@ -334,6 +337,7 @@ router.get('/processar', async (req, res) => {
 
                 justificativa:
                     `Último registro encontrado via ${ultimoRegistro.tipoComunicacao}`
+
             });
             console.log("DADOS MAPA", {
                 identificador,

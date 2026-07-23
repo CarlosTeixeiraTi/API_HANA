@@ -21,7 +21,22 @@ router.get("/", async (req, res) => {
                     item.grupoAtual !==
                     "Tags Digitais Não Habilitadas"
             );
-
+        const componentesElegiveis =
+            [...componentesValidos];
+        const componentesOnline =
+            componentesElegiveis.filter(
+                item =>
+                    estaOnline(
+                        item.updatedAt
+                    )
+            );
+        const disponibilidadeMonitoramento =
+            componentesElegiveis.length > 0
+                ? (
+                    componentesOnline.length /
+                    componentesElegiveis.length
+                ) * 100
+                : 0;
         const totalComponentes =
             componentesValidos.length;
 
@@ -70,7 +85,25 @@ router.get("/", async (req, res) => {
          * KPI 4
          * Componentes movimentados
          */
+        const totalGatewaysPlanejado = 7;
 
+        const gatewaysAtivos =
+            componentes
+                .filter(
+                    item => item.gateway
+                )
+                .map(
+                    item => item.gateway
+                );
+
+        const gatewaysUnicos =
+            [...new Set(gatewaysAtivos)];
+
+        const percentualGateway =
+            (
+                gatewaysUnicos.length /
+                totalGatewaysPlanejado
+            ) * 100;
         const identificadores =
             await Rastreio.findAll({
 
@@ -154,10 +187,11 @@ router.get("/", async (req, res) => {
 
         const indiceEfetividade =
             (
-                (tempoLocalizacao * 0.30) +
-                (rastreabilidade * 0.40) +
+                (disponibilidadeMonitoramento * 0.35) +
+                (cobertura * 0.25) +
                 (percentualMovimentados * 0.20) +
-                (cobertura * 0.10)
+                (tempoLocalizacao * 0.10) +
+                (percentualGateway * 0.10)
             );
 
         let classificacao =
@@ -186,30 +220,36 @@ router.get("/", async (req, res) => {
 
         return res.json({
 
-            tempoLocalizacao:
-                tempoLocalizacao.toFixed(1),
+    tempoLocalizacao:
+        tempoLocalizacao.toFixed(1),
 
-            rastreabilidade:
-                rastreabilidade.toFixed(1),
+    rastreabilidade:
+        rastreabilidade.toFixed(1),
 
-            cobertura:
-                cobertura.toFixed(1),
+    disponibilidadeMonitoramento:
+        disponibilidadeMonitoramento.toFixed(1),
 
-            componentesMovimentados,
+    componentesDisponiveis:
+        componentesOnline.length,
 
-            percentualMovimentados:
-                percentualMovimentados.toFixed(1),
+    cobertura:
+        cobertura.toFixed(1),
 
-            totalMovimentacoes,
+    componentesMovimentados,
 
-            totalComponentes,
+    percentualMovimentados:
+        percentualMovimentados.toFixed(1),
 
-            indiceEfetividade:
-                indiceEfetividade.toFixed(1),
+    totalMovimentacoes,
 
-            classificacao
+    totalComponentes,
 
-        });
+    indiceEfetividade:
+        indiceEfetividade.toFixed(1),
+
+    classificacao
+
+});
 
     } catch (err) {
 
@@ -226,6 +266,32 @@ router.get("/", async (req, res) => {
     }
 
 });
+function estaOnline(
+    dataAtualizacao
+) {
 
+    if (!dataAtualizacao) {
+        return false;
+    }
+
+    const agora =
+        new Date();
+
+    const data =
+        new Date(
+            dataAtualizacao
+        );
+
+    const diferencaDias =
+        (
+            agora - data
+        ) /
+        (
+            1000 * 60 * 60 * 24
+        );
+
+    return diferencaDias <= 7;
+
+}
 module.exports = app =>
     app.use('/ValorGerado', router);
